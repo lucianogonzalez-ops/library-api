@@ -49,13 +49,13 @@ export async function putBook(bookData: NewBook, bookId: number): Promise<Book[]
     return row ? [row.toJSON()] : [];
 }
 
-export async function deleteBook(bookId:number){
-    const deletedBook = BookModel.destroy({
+export async function deleteBook(bookId:number):Promise<boolean> {
+    const deletedBook = await BookModel.destroy({
             where:{
                 id:bookId
             }
         })
-        return deletedBook
+    return deletedBook > 0
 }
 
 

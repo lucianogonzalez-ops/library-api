@@ -48,6 +48,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    put:
+      summary: Reemplaza un autor
+      tags:
+        - Author
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAuthor'
+      responses:
+        '200':
+          description: Autor reemplazado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '404':
+          description: El autor no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Borra un autor por su ID
+      tags:
+        - Author
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Autor borrado
+        '404':
+          description: El autor no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        
+
+
 
   /authors:
     get:
@@ -67,6 +118,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    post:
+        summary: Crea un nuevo autor
+        tags:
+          - Author
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewAuthor'
+        responses:
+          '201':
+            description: Autor creado exitosamente
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Author'
 
   /books/{id}:
     get:
@@ -249,22 +317,18 @@ paths:
   
   /loans:
       get:
-        summary: Obtiene los detalles de  los prestamos
+        summary: Lista todos los préstamos
         tags:
           - Loan
         responses:
           '200':
-            description:  prestamo encontrado exitosamente
+            description: Lista de préstamos
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Loan'
-          '404':
-            description: El prestamo no existe
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Error'
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Loan'
 
 
 
@@ -476,4 +540,14 @@ components:
                 available:
                   type: boolean
                   example: false
+    NewAuthor:
+          type: object
+          required: [name, nationality]
+          properties:
+            name:
+              type: string
+              example: Jorge Luis Borges
+            nationality:
+              type: string
+              example: Argentinean
 
