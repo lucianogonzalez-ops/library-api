@@ -4,6 +4,10 @@ import docsRouter from "./docs.js";
 import booksRoutes from "./routes/books.routes.js";
 import authorsRoutes from "./routes/authors.routes.js";
 import loansRoutes from "./routes/loan.routes.js"
+import authRouter from './routes/auth.routes.js';
+
+
+import 'dotenv/config';
 
 const app = express();
 const PORT = 3000;
@@ -22,6 +26,7 @@ app.use("/docs", docsRouter);
 app.use("/authors", authorsRoutes);
 app.use("/books", booksRoutes);
 app.use("/loans", loansRoutes);
+app.use('/auth', authRouter);
 
 
 // Ya hecho. Si un pedido falla con un error que nadie atrapó (por ejemplo, un error
@@ -36,10 +41,7 @@ app.get('/test-error', (req, res, next) => {
 });
 
 
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ error: 'Algo salió mal, intenta más tarde' });
-});
+
 
 async function start() {
   await sequelize.authenticate(); // falla si Postgres no está prendido, si la base `library` no existe o si la contraseña de src/db/connection.ts está mal
