@@ -23,10 +23,22 @@ app.use("/authors", authorsRoutes);
 app.use("/books", booksRoutes);
 app.use("/loans", loansRoutes);
 
+
 // Ya hecho. Si un pedido falla con un error que nadie atrapó (por ejemplo, un error
 // de la base), lo mostramos en la terminal en vez de apagar el servidor.
 process.on("unhandledRejection", (error) => {
   console.error("❌ Unhandled error:", error);
+});
+
+app.get('/test-error', (req, res, next) => {
+  // Opción A: Lanzar un error sincrónico
+  throw new Error("¡Error de prueba provocado!");
+});
+
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: 'Algo salió mal, intenta más tarde' });
 });
 
 async function start() {

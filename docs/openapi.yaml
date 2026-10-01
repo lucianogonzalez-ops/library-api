@@ -283,13 +283,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Book'
 
-
-      
-
-  
-  
-  
-  
   /loans/{id}:
       get:
         summary: Obtiene los detalles de un libro prestado por su ID

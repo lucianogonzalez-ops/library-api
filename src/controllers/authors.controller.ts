@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import {getAuthorByIdService,listAuthorsService,createAuthorService, replaceAuthorService,deleteAuthorService,
 } from '../services/authors.service.js';
 
+
 export async function getById(req: Request, res: Response) {
     const result = await getAuthorByIdService(Number(req.params.id));
     if (result === "AUTHOR_NOT_FOUND") return res.status(404).json({ error: "Author not found" });
@@ -9,7 +10,7 @@ export async function getById(req: Request, res: Response) {
 }
 
 export async function list(req: Request, res: Response) {
-    res.json({data : await listAuthorsService()});
+    res.json({data :await listAuthorsService()});
 }
 
 export async function create(req: Request, res: Response) {
@@ -27,7 +28,7 @@ export async function remove(req: Request, res: Response) {
     const result = await deleteAuthorService(Number(req.params.id));
     if (result === "AUTHOR_NOT_FOUND") return res.status(404).json({ error: "Author not found" });
     if (result === "AUTHOR_HAS_BOOKS") return res.status(409).json({ error: "Author has books" });
-
-
     res.status(204).send();
 }
+
+

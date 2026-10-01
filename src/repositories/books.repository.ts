@@ -7,9 +7,6 @@ export async function getBookByID(id: number): Promise<Book | null> {
     return row ? row.toJSON() : null;
 }
 
-
-
-
 export async function insertBook(bookData: NewBook): Promise<Book[]> {
     const row = await BookModel.create({
     title: bookData.title,

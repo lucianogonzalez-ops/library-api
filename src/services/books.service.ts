@@ -12,7 +12,6 @@ export async function getBookByIdService(id: number):Promise<Book|"BOOK_NOT_FOUN
     return book;
 }
 
-
 export async function createBookService(bookData: NewBook): Promise<NewBook | "AUTHOR_NOT_FOUND"> {
     const author = await getAuthorByID(bookData.author_id);
     if (!author) return "AUTHOR_NOT_FOUND"
