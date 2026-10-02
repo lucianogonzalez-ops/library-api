@@ -1,6 +1,13 @@
 import express, { Request, Response } from "express";
 import { sequelize } from "./db/connection.js";
 import docsRouter from "./docs.js";
+import booksRoutes from "./routes/books.routes.js";
+import authorsRoutes from "./routes/authors.routes.js";
+import loansRoutes from "./routes/loan.routes.js"
+import authRouter from './routes/auth.routes.js';
+
+
+import 'dotenv/config';
 
 const app = express();
 const PORT = 3000;
@@ -16,15 +23,25 @@ app.get("/", (req: Request, res: Response) => {
 app.use("/docs", docsRouter);
 
 // 👇 Acá vas a montar tus routers:
-// app.use("/authors", authorsRoutes);
-// app.use("/books", booksRoutes);
-// app.use("/loans", loansRoutes);
+app.use("/authors", authorsRoutes);
+app.use("/books", booksRoutes);
+app.use("/loans", loansRoutes);
+app.use('/auth', authRouter);
+
 
 // Ya hecho. Si un pedido falla con un error que nadie atrapó (por ejemplo, un error
 // de la base), lo mostramos en la terminal en vez de apagar el servidor.
 process.on("unhandledRejection", (error) => {
   console.error("❌ Unhandled error:", error);
 });
+
+app.get('/test-error', (req, res, next) => {
+  // Opción A: Lanzar un error sincrónico
+  throw new Error("¡Error de prueba provocado!");
+});
+
+
+
 
 async function start() {
   await sequelize.authenticate(); // falla si Postgres no está prendido, si la base `library` no existe o si la contraseña de src/db/connection.ts está mal

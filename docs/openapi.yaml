@@ -48,6 +48,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    put:
+      summary: Reemplaza un autor
+      tags:
+        - Author
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAuthor'
+      responses:
+        '200':
+          description: Autor reemplazado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '404':
+          description: El autor no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Borra un autor por su ID
+      tags:
+        - Author
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Autor borrado
+        '404':
+          description: El autor no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        
+
+
 
   /authors:
     get:
@@ -67,6 +118,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    post:
+        summary: Crea un nuevo autor
+        tags:
+          - Author
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewAuthor'
+        responses:
+          '201':
+            description: Autor creado exitosamente
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Author'
 
   /books/{id}:
     get:
@@ -166,22 +234,37 @@ paths:
   
   /books:
     get:
-      summary: Obtiene los detalles de los libros
-      tags:
-        - Book
-      responses:
-        '200':
-          description: Libro encontrado exitosamente
-          content:
-            application/json:
+          summary: Lista los libros con filtros y paginación
+          tags:
+            - Book
+          parameters:
+            - name: available
+              in: query
+              required: false
               schema:
-                $ref: '#/components/schemas/Book'
-        '404':
-          description: El Libro no existe
-          content:
-            application/json:
+                type: boolean
+            - name: page
+              in: query
+              required: false
               schema:
-                $ref: '#/components/schemas/Error'
+                type: integer
+                minimum: 1
+                default: 1
+            - name: limit
+              in: query
+              required: false
+              schema:
+                type: integer
+                minimum: 1
+                maximum: 100
+                default: 20
+          responses:
+            '200':
+              description: Página de libros
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/BookPage'
     post:
       summary: Crea un nuevo libro
       tags:
@@ -200,13 +283,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Book'
 
-
-      
-
-  
-  
-  
-  
   /loans/{id}:
       get:
         summary: Obtiene los detalles de un libro prestado por su ID
@@ -234,22 +310,80 @@ paths:
   
   /loans:
       get:
-        summary: Obtiene los detalles de  los prestamos
+        summary: Lista todos los préstamos
         tags:
           - Loan
         responses:
           '200':
-            description:  prestamo encontrado exitosamente
+            description: Lista de préstamos
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Loan'
-          '404':
-            description: El prestamo no existe
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Error'
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Loan'
+
+  /auth/register:
+    post:
+      summary: Registra un nuevo usuario
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        '201':
+          description: Usuario creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          description: Los datos enviados no son válidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '409':
+          description: El email ya está registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Email already registered
+
+  /auth/login:
+    post:
+      summary: Inicia sesión y devuelve un token JWT (válido por 1 hora)
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '400':
+          description: Credenciales inválidas o datos no válidos
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Message'
+                  - $ref: '#/components/schemas/ValidationError'
+              example:
+                message: Credenciales inválidas
 
 
 
@@ -340,6 +474,11 @@ components:
         available :
           type: boolean
           example : false
+
+
+
+
+
     
     Loan:
       type: object
@@ -456,4 +595,70 @@ components:
                 available:
                   type: boolean
                   example: false
+    NewAuthor:
+          type: object
+          required: [name, nationality]
+          properties:
+            name:
+              type: string
+              example: Jorge Luis Borges
+            nationality:
+              type: string
+              example: Argentinean
+
+    NewUser:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          example: s3cretPass
+
+    Message:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          example: Usuario creado
+
+    Token:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          description: JWT con el payload `{ email, role }`. Se envía en el header `Authorization Bearer <token>`.
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    ValidationError:
+      type: object
+      required: [status, code, message, errors]
+      properties:
+        status:
+          type: string
+          example: error
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+          example: Los datos enviados no son válidos.
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                example: email
+              message:
+                type: string
+                example: '"email" must be a valid email'
 

@@ -1,22 +1,39 @@
 // Crea las tablas desde cero y carga datos de ejemplo.
 // Correr con: npm run seed
-// ⚠️ Borra todo lo que hubiera en las tablas authors, books y loans de la base `library`.
+// ⚠️ Borra todo lo que hubiera en las tablas authors, books, loans y users de la base `library`.
 
+import bcrypt from "bcryptjs"; // 👈 Importamos bcrypt
 import { sequelize } from "./connection.js";
-import { Author, Book, Loan } from "../models/index.js";
-
+import { Author, Book, Loan, } from "../models/index.js"; // 👈 Agregamos User al import
+import { User } from "../models/Users.js";
 async function seed() {
   await sequelize.sync({ force: true });
 
+  const adminPasswordHash = await bcrypt.hash("admin123", 10);
+  const userPasswordHash = await bcrypt.hash("user123", 10);
+
+  await User.bulkCreate([
+    { 
+      email: "admin@library.com", 
+      passwordHash: adminPasswordHash, 
+      role: "admin" 
+    },
+    {
+      email: "lector@library.com", 
+      passwordHash: userPasswordHash, 
+    }
+  ]);
+
+  // 2. CREAR AUTORES
   const [cortazar, borges, ocampo, bolano] = await Author.bulkCreate([
     { name: "Julio Cortázar", nationality: "Argentina" },
     { name: "Jorge Luis Borges", nationality: "Argentina" },
     { name: "Silvina Ocampo", nationality: "Argentina" },
     { name: "Roberto Bolaño", nationality: "Chile" },
-    // sin libros a propósito: sirve para probar el DELETE exitoso de un autor
     { name: "Mariana Enriquez", nationality: "Argentina" },
   ]);
 
+  // 3. CREAR LIBROS
   const books = await Book.bulkCreate([
     { title: "Rayuela", year: 1963, author_id: cortazar.id, available: true },
     { title: "Bestiario", year: 1951, author_id: cortazar.id, available: false },
@@ -29,16 +46,15 @@ async function seed() {
   const bestiario = books[1];
   const elAleph = books[3];
 
+  // 4. CREAR PRÉSTAMOS
   await Loan.bulkCreate([
-    // préstamo ya devuelto
     { book_id: bestiario.id, member_name: "Ana Pérez", loan_date: "2026-08-01", return_date: "2026-08-15" },
-    // préstamos activos (coinciden con los libros que están en available: false)
     { book_id: bestiario.id, member_name: "Luis Gómez", loan_date: "2026-09-10", return_date: null },
     { book_id: elAleph.id, member_name: "Ana Pérez", loan_date: "2026-09-18", return_date: null },
   ]);
 
   console.log("✅ Database created and loaded:");
-  console.log(`   ${await Author.count()} authors, ${await Book.count()} books, ${await Loan.count()} loans`);
+  console.log(`   ${await User.count()} users, ${await Author.count()} authors, ${await Book.count()} books, ${await Loan.count()} loans`);
   await sequelize.close();
 }
 
