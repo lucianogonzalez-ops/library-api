@@ -8,22 +8,26 @@ import authRouter from './routes/auth.routes.js';
 
 
 import 'dotenv/config';
+import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json()); // permite leer JSON del body en POST / PUT / PATCH
-
+app.use(errorHandler);
 // Ruta de prueba: si esto responde, el servidor está levantado.
 app.get("/", (req: Request, res: Response) => {
   res.json({ message: "Library API running", docs: `http://localhost:${PORT}/docs` });
 });
 
+
 // Documentación interactiva del contrato (docs/openapi.yaml). Ya hecho.
 app.use("/docs", docsRouter);
 
 // 👇 Acá vas a montar tus routers:
+
 app.use("/authors", authorsRoutes);
+
 app.use("/books", booksRoutes);
 app.use("/loans", loansRoutes);
 app.use('/auth', authRouter);
